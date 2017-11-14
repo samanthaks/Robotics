@@ -4,18 +4,20 @@
 import cv2
 import numpy as np
 
-img = cv2.imread('image.jpg')
 
 def mouse_callback(event, x, y, flags, params):
-        if event == cv2.EVENT_LBUTTONDOWN:
-        	global clicks
-        	clicks.append([x,y])
-        	print(clicks)
-        	if len(clicks) == 4:
-        		homography(img, np.array(clicks))
+    if event == cv2.EVENT_LBUTTONDOWN:
+    	global clicks
+    	clicks.append([x,y])
+    	print(clicks)
+    	cv2.circle(img, (x,y), 5, (255,192,203), -1)
+    	cv2.imshow("image", img)
+    	if len(clicks) == 4:
+    		homography(img, np.array(clicks))
+
 
 def homography(im_source, pts_source):
-	print("Hi")
+	print("Homography Function")
 	print(pts_source)
 	cm_width = 30
 	cm_height = 22.5
@@ -34,10 +36,12 @@ def homography(im_source, pts_source):
 
 	cv2.imshow("roadway", im_roadway)
 
+
+img = cv2.imread('image.jpg')
+
 clicks = list()
 cv2.namedWindow('image', cv2.WINDOW_NORMAL)
 cv2.setMouseCallback('image',  mouse_callback) 
-
 
 
 # show the images
