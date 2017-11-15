@@ -4,7 +4,7 @@
 import cv2
 import numpy as np
 
-img = cv2.imread('image.jpg')
+img = cv2.imread('image2.jpg')
 
 def mouse_callback(event, x, y, flags, params):
         if event == cv2.EVENT_LBUTTONDOWN:
@@ -15,8 +15,6 @@ def mouse_callback(event, x, y, flags, params):
         		homography(img, np.array(clicks))
 
 def homography(im_source, pts_source):
-	print("Hi")
-	print(pts_source)
 	cm_width = 30
 	cm_height = 22.5
 
@@ -33,6 +31,36 @@ def homography(im_source, pts_source):
 	im_roadway = cv2.warpPerspective(im_source, transform,(px_width,px_height))
 
 	cv2.imshow("roadway", im_roadway)
+	b_and_w(im_roadway)
+
+def b_and_w(im_homography):
+	yellow_bounds = [[10,100,100],[40,255,255]]
+	lower = yellow_bounds[0]
+	upper = yellow_bounds[1]
+
+	lower = np.array(lower, dtype="uint8")
+	upper = np.array(upper, dtype="uint8")
+	
+	hsv = cv2.cvtColor(im_homography, cv2.COLOR_BGR2HSV)
+	cv2.imwrite('hsv_image.jpg',hsv)
+	im_hsv = cv2.imread('hsv_image.jpg')
+
+	mask = cv2.inRange(im_hsv, lower, upper)
+	output = cv2.bitwise_and(im_hsv, im_hsv, mask=mask)
+	output = cv2.cvtColor(output, cv2.COLOR_BGR2GRAY)
+		
+	ret, thresh1 = cv2.threshold(output, 0, 255, cv2.THRESH_BINARY)
+	cv2.imshow("ret", thresh1)
+	canny_lines(thresh1)
+
+def canny_lines(b_and_w):
+	edges = cv2.Canny(b_and_w,100,200)
+	cv2.imshow("lines",edges)
+
+
+
+
+
 
 clicks = list()
 cv2.namedWindow('image', cv2.WINDOW_NORMAL)
