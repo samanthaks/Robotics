@@ -14,8 +14,6 @@ def mouse_callback(event, x, y, flags, params):
 			#homography(img, np.array(clicks))
 
 def homography(im_source, pts_source):
-	print("Homography Function")
-
 	cm_width = 30
 	cm_height = 22.5
 
@@ -31,8 +29,7 @@ def homography(im_source, pts_source):
 
 	im_roadway = cv2.warpPerspective(im_source, transform,(px_width,px_height))
 	cv2.imwrite("homography_img.jpg",im_roadway)
-	#cv2.imshow("roadway", im_roadway)
-	#b_and_w(im_roadway)
+	
 	return im_roadway,transform # returns homographied image
 
 def transform_img(img, transform):
@@ -77,8 +74,12 @@ def canny_lines(b_and_w):
 	#cv2.imshow("lines",edges)
 	return(edges)
 
-def hough(edges):
-	img = cv2.imread('homography_img.jpg')
+def hough(edges, new_hom):
+	#img = cv2.imread('homography_img.jpg')
+	#cv2.imshow('hom',new_hom)
+	#cv2.waitKey(10000)
+	img = new_hom
+	height, width = img.shape[:2]
 	lines = cv2.HoughLines(edges, 1, np.pi/90, 75)
 	line_1 = []
 	line_2 = []
@@ -105,21 +106,20 @@ def hough(edges):
 		ctr_y1 = round((line_1[1] + line_2[1])/2)
 		ctr_x2 = round((line_1[2] + line_2[2])/2)
 		ctr_y2 = round((line_1[3] + line_2[3])/2)
-		cv2.line(img,(ctr_x1,ctr_y1),(ctr_x2,ctr_y2),(0,0,255),2)
+		#cv2.line(img,(ctr_x1,ctr_y1),(ctr_x2,ctr_y2),(0,0,255),2)
 		#cv2.imshow('hough_lines',img)
-		#cv2.waitKey(10000)
-		return([ctr_x1,ctr_y1,ctr_x2,ctr_y2],math.degrees(line_1[5]))	
+		#cv2.waitKey(5000)
+		return([ctr_x1,ctr_y1,ctr_x2,ctr_y2],line_1[4],math.degrees(line_1[5]))	
 	else:
-		cv2.line(img,(line_1[0],line_1[1]),(line_1[2],line_1[3]),(0,0,255),2)	
+		#cv2.line(img,(line_1[0],line_1[1]),(line_1[2],line_1[3]),(0,0,255),2)	
 		#cv2.imshow('hough_lines',img)
-		#cv2.waitKey(10000)
-		return(line_1[:4],math.degrees(line_1[5]))
+		#cv2.waitKey(5000)
+		return(line_1[:4],line_1[4],math.degrees(line_1[5]))
 
 
 def main():
 	global img
 	global clicks
-	global robo_dist # dist from robot to image
 
 	clicks = list()
 	img = cv2.imread('calibration_image.jpg')
@@ -133,37 +133,62 @@ def main():
 	if key == ord('c'):
 		if len(clicks) == 4:
 			im_hom,transform = homography(img, np.array(clicks))
-			black_and_white = b_and_w(im_hom)
-			edges = canny_lines(black_and_white)
 
-			hough_coords, hough_angle = hough(edges)
-			if hough_angle > 10 and hough_angle < 90:
-				print("turn left")
-			elif hough_angle < 10:
-				print("parallel")
-			else:
-				print("turn right")
-
-			new_img = cv2.imread('image.jpg')
+			new_img = cv2.imread('test7.jpg')
+			
+			# code with the homography cropping
 			
 			new_hom = transform_img(new_img, transform)
-			
-			cv2.imshow('test',new_hom)
-			cv2.waitKey(1000)
 	
 			black_and_white = b_and_w(new_hom)
 			edges = canny_lines(black_and_white)
-			cv2.imshow("test",edges)
-			cv2.waitKey(1000)
+			#cv2.imshow("test",black_and_white)
+			#cv2.waitKey(10000)
 
-			hough_coords, hough_angle = hough(edges)
-			print(hough_angle)
-			if (hough_angle > 10 and hough_angle < 90) or (hough_angle > 190 and hough_angle < 270):
-				print("turn left")
-			elif (hough_angle < 10 or hough_angle > 350) or (hough_angle > 170 and hough_angle < 190):
-				print("parallel")
-			else:
-				print("turn right")
-
+			hough_coords, hough_rho, hough_angle = hough(edges, new_hom)
+			#print(hough_angle)
+			#print(hough_rho)
 			
+			'''
+			# code without
+			black_and_white = b_and_w(new_img)
+			edges = canny_lines(black_and_white)
+			hough_coords, hough_rho, hough_angle = hough(edges, new_img)
+			point_1 = hough_coords[:2]
+			point_2 = hough_coords[2:]
+			
+			source_point_1 = np.array([point_1[0],point_1[1],1])
+			source_point_2 = np.array([point_2[0],point_2[1],1])
+			roadway_point_1 = transform.dot(source_point_1)	
+			roadway_point_2 = transform.dot(source_point_2)
+			roadway_1 = [int(roadway_point_1[0]/roadway_point_1[2]), int(roadway_point_1[1]/roadway_point_1[2])]	
+			roadway_2 = [int(roadway_point_2[0]/roadway_point_2[2]), int(roadway_point_2[1]/roadway_point_2[2])]
+			print(roadway_1)
+			print(roadway_2)
+			return
+			slope = (roadway_2[1] - roadway_1[1])/(roadway_2[0] - roadway_1[0])
+			intercept = roadway_1[1] - (slope * roadway_1[0])
+			print(slope)
+			print(intercept)
+			# y = slope(x) + intercept
+			x1 = -1000
+			x2 = 1000
+			y1 = int((slope * x1) + intercept)
+			y2 = int((slope * x2) + intercept)
+			print(x1,y1)
+			print(x2,y2)
+			homog = transform_img(new_img, transform)	
+			cv2.line(homog,(x1,y1),(x2,y2),(0,0,255),2)	
+			cv2.imshow('hough_lines',homog)
+			cv2.waitKey(0)
+
+			'''
+			if (hough_rho > 0 and hough_angle > 5 and hough_angle < 90):
+				turn_angle = hough_angle
+				print("turn " + str(turn_angle) + " degrees right")
+			elif (hough_rho < 0 and hough_angle > 95 and hough_angle < 175):
+				turn_angle = -(180 - hough_angle)
+				print("turn " + str(turn_angle) + " degrees left")
+			else:
+				print("parallel")		
 main()
