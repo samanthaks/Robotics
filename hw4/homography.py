@@ -9,9 +9,6 @@ def mouse_callback(event, x, y, flags, params):
 		clicks.append([x,y])
 		cv2.circle(img, (x,y), 5, (255,192,203), -1)
 		cv2.imshow("image", img)
-		#if len(clicks) == 4:
-			#return
-			#homography(img, np.array(clicks))
 
 def homography(im_source, pts_source):
 	cm_width = 30
@@ -43,6 +40,7 @@ def transform_img(img, transform):
 	px_height = round(in_height * 50)
 
 	homographied_image = cv2.warpPerspective(img, transform,(px_width,px_height))
+	cv2.imwrite('testing.jpg',homographied_image)
 	return homographied_image
 
 def b_and_w(im_homography):
@@ -50,7 +48,7 @@ def b_and_w(im_homography):
 	#im_homography = cv2.GaussianBlur(im_homography,(5,5),0)
 	#cv2.imshow("test",im_homography)
 
-	yellow_bounds = [[10,100,100],[40,255,255]]
+	yellow_bounds = [[10,200,100],[60,255,255]]
 	lower = yellow_bounds[0]
 	upper = yellow_bounds[1]
 
@@ -66,8 +64,21 @@ def b_and_w(im_homography):
 	output = cv2.cvtColor(output, cv2.COLOR_BGR2GRAY)
 		
 	ret, thresh1 = cv2.threshold(output, 0, 255, cv2.THRESH_BINARY)
+	_, contours, hierarchy = cv2.findContours(thresh1, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+	contour_list = []
+
+	for contour in contours:
+		area = cv2.contourArea(contour)
+		if area > 7000:
+			contour_list.append(contour)
+			 
+	image = np.zeros(thresh1.shape, np.uint8)        
+	cv2.drawContours(image, contour_list,  -1, (255,0,0), 3)
+	
+
 	#cv2.imshow("ret", thresh1)
-	return thresh1
+	return image
+
 
 def canny_lines(b_and_w):
 	edges = cv2.Canny(b_and_w,100,200)
@@ -134,7 +145,7 @@ def main():
 		if len(clicks) == 4:
 			im_hom,transform = homography(img, np.array(clicks))
 
-			new_img = cv2.imread('test7.jpg')
+			new_img = cv2.imread('test2.jpg')
 			
 			# code with the homography cropping
 			
@@ -142,12 +153,18 @@ def main():
 	
 			black_and_white = b_and_w(new_hom)
 			edges = canny_lines(black_and_white)
-			#cv2.imshow("test",black_and_white)
-			#cv2.waitKey(10000)
+
+			cv2.imshow("test",black_and_white)
+			cv2.waitKey(0)
 
 			hough_coords, hough_rho, hough_angle = hough(edges, new_hom)
 			#print(hough_angle)
 			#print(hough_rho)
+			
+			cv2.line(new_hom,(hough_coords[0],hough_coords[1]),(hough_coords[2],hough_coords[3]),(0,0,255),2)	
+			cv2.imshow('hough_lines',new_hom)
+			cv2.waitKey(0)
+
 			
 			'''
 			# code without
