@@ -66,8 +66,25 @@ def b_and_w(im_homography):
 	output = cv2.cvtColor(output, cv2.COLOR_BGR2GRAY)
 		
 	ret, thresh1 = cv2.threshold(output, 0, 255, cv2.THRESH_BINARY)
+	_, contours, hierarchy = cv2.findContours(thresh1, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+	contour_list = []
+
+	for contour in contours:
+		area = cv2.contourArea(contour)
+		if area > 10000:
+			contour_list.append(contour)
+			
+
+	
+            
+        
+	image = np.zeros(thresh1.shape, np.uint8)        
+	cv2.drawContours(image, contour_list,  -1, (255,0,0), 3)
+	
+
 	#cv2.imshow("ret", thresh1)
-	return thresh1
+	return image
+
 
 def canny_lines(b_and_w):
 	edges = cv2.Canny(b_and_w,100,200)
@@ -122,7 +139,7 @@ def main():
 	global clicks
 
 	clicks = list()
-	img = cv2.imread('calibration_image.jpg')
+	img = cv2.imread('image.jpg')
 
 	cv2.namedWindow('image', cv2.WINDOW_NORMAL)
 	cv2.setMouseCallback('image', mouse_callback) 
@@ -134,7 +151,7 @@ def main():
 		if len(clicks) == 4:
 			im_hom,transform = homography(img, np.array(clicks))
 
-			new_img = cv2.imread('test7.jpg')
+			new_img = cv2.imread('image.jpg')
 			
 			# code with the homography cropping
 			
@@ -142,8 +159,9 @@ def main():
 	
 			black_and_white = b_and_w(new_hom)
 			edges = canny_lines(black_and_white)
-			#cv2.imshow("test",black_and_white)
-			#cv2.waitKey(10000)
+
+			cv2.imshow("test",edges)
+			cv2.waitKey(0)
 
 			hough_coords, hough_rho, hough_angle = hough(edges, new_hom)
 			#print(hough_angle)
