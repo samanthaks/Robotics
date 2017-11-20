@@ -42,10 +42,22 @@ def turn_left_degrees(deg):
     left_rot()
     time.sleep(0.5)
 
+
+def move_forward_pixels(pix):
+    #100 pixels = 2 inches
+    #8 inches = 18 in tgt
+    inches = pix/float(50)
+    print("MOVE FORWARD")
+    enc_tgt(1,1,(18/8)*inches)
+    fwd()
+    time.sleep(0.5)
+
+
 def move_left_to_line(dist):
 	turn_left_degrees(90)
 	move_forward_pixels(dist)
 	turn_right_degrees(90)
+
 
 def move_right_to_line(dist):
 	turn_right_degrees(90)
