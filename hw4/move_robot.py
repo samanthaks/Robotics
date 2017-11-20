@@ -41,3 +41,14 @@ def turn_left_degrees(deg):
     enc_tgt(0,1,int(deg*2//DPR))
     left_rot()
     time.sleep(0.5)
+
+def move_left_to_line(dist):
+	turn_left_degrees(90)
+	move_forward_pixels(dist)
+	turn_right_degrees(90)
+
+def move_right_to_line(dist):
+	turn_right_degrees(90)
+	move_forward_pixels(dist)
+	turn_left_degrees(90)
+
