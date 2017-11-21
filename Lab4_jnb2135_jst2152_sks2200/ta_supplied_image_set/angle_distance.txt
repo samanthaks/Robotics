@@ -1,0 +1,14 @@
+calculated_angle_offset = 20.0000046545 degrees
+Since rho is positive and theta = 159.99999534548672 degrees, this is a left turn by 180 - 159.99999534548672 degrees 
+
+calculated_distance_offset = 222.5 pixels
+NOTE: our code works to find the calculated distance offset ONLY after we turn the robot parallel to the line. So this value is pretty meaningless since the robot is at an angle.
+
+homography_transform_matrix = 
+[[ -3.55543822e+01  -4.92913026e+01   6.44019151e+03]
+ [  1.81983461e+00  -1.62875198e+02   1.25714175e+04]
+ [ -2.07807273e-03  -1.42646478e-01   1.00000000e+00]]
+
+
+ALSO NOTE:
+we have no stop_sign_filtered.jpg because that’s not how we implemented our program — see README
