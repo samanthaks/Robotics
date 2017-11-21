@@ -1,0 +1,3 @@
+calculated_angle_offset = <angle_offset>
+calculated_distance_offset = <distance_offset in cm>
+homography_transform_matrix = <matrix>
