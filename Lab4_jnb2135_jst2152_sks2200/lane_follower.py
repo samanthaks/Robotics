@@ -5,6 +5,7 @@ import math
 import move_robot as mr
 import capture_img as ci
 from picamera import PiCamera
+from gopigo import *
 
 def mouse_callback(event, x, y, flags, params):
     if event == cv2.EVENT_LBUTTONDOWN:
@@ -46,8 +47,9 @@ def transform_img(img, transform):
     cv2.imwrite('testing.jpg',homographied_image)
     return homographied_image
 
-#def b_and_w(im_homography, yellow_bounds=[[0,100,200],[60,255,255]]): # on track
-def b_and_w(im_homography, yellow_bounds=[[0,100,100],[60,255,255]]): # in EC
+def b_and_w(im_homography, yellow_bounds=[[0,100,200],[60,255,255]]):
+#def b_and_w(im_homography, yellow_bounds=[[0,100,100],[60,255,255]]):
+
     # gaussian blur
     #im_homography = cv2.GaussianBlur(im_homography,(5,5),0)
     #cv2.imshow("test",im_homography)
@@ -71,8 +73,8 @@ def b_and_w(im_homography, yellow_bounds=[[0,100,100],[60,255,255]]): # in EC
     output = cv2.cvtColor(output, cv2.COLOR_BGR2GRAY)
         
     ret, thresh1 = cv2.threshold(output, 0, 255, cv2.THRESH_BINARY)
-    cv2.imshow('bandw',thresh1)
-    cv2.waitKey(5000)
+    #cv2.imshow('bandw',thresh1)
+    #cv2.waitKey(5000)
 
     _, contours, hierarchy = cv2.findContours(thresh1, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     contour_list = []
@@ -92,7 +94,8 @@ def b_and_w(im_homography, yellow_bounds=[[0,100,100],[60,255,255]]): # in EC
 
 def canny_lines(b_and_w):
     edges = cv2.Canny(b_and_w,100,200)
-    #cv2.imshow("lines",edges)
+    cv2.imshow("lines",edges)
+    cv2.waitKey(2000)
     return(edges)
 
 def hough(edges, new_hom):
@@ -107,7 +110,7 @@ def hough(edges, new_hom):
     line_2 = []
 
     if lines == None:
-        return(None, None, None)
+        return(None, None, None, False)
         #mr.turn_left_degrees(10)
         #ci.capture_img(camera)
         #try_again = cv2.imread('current_image.jpg')
@@ -141,8 +144,8 @@ def hough(edges, new_hom):
         return(None, None, None, orange)
     line = all_lines[0]
     cv2.line(img,(line[0],line[1]),(line[2],line[3]),(0,0,255),2)
-    cv2.imshow('hough_lines',img)
-    cv2.waitKey(5000)
+    #cv2.imshow('hough_lines',img)
+    #cv2.waitKey(5000)
     return(line[:4],line[4],math.degrees(line[5]), orange)
     #if line_1[5] < line_2[5]:
     #    choose = '1'
@@ -183,8 +186,11 @@ def move_to_orange(transform):
     orange = True
     while orange:
         found_perpendicular = False
+        print("moving forward to orange")
         mr.move_forward()
-        mr.turn_right_degrees(3)
+        print("turning right 3 degrees to adjust")
+        mr.turn_right_degrees(10)
+        mr.turn_left_degrees(7)
         ci.capture_img(camera)
         img = cv2.imread('current_image.jpg')
         new_hom = transform_img(img, transform)
@@ -196,11 +202,12 @@ def move_to_orange(transform):
                 line = line[0]
                 rho = line[0]
                 theta = line[1]
-                if(rho > 0 and math.degrees(theta) > 80 and math.degrees(theta) < 100):
+                if(rho > 0 and math.degrees(theta) > 70 and math.degrees(theta) < 110):
                     found_perpendicular = True
                     break
 
         if not found_perpendicular:
+            print("didn't find orange")
             orange = False
     return
 
@@ -209,9 +216,14 @@ def main():
     global img
     global clicks
     global camera
+
     camera = PiCamera()
 
+    enable_encoders()
+
+
     clicks = list()
+    turned = -1
     #img = cv2.imread('calibration_image.jpg')
     ci.capture_img(camera)
     img = cv2.imread('current_image.jpg')
@@ -238,51 +250,72 @@ def main():
                 #cv2.imshow("bandw",black_and_white)
                 #cv2.waitKey(5000)
 
-                #cv2.imshow("test",black_and_white)
+                # cv2.imshow("test",black_and_white)
                 #cv2.waitKey(0)
 
                 hough_coords, hough_rho, hough_angle, orange = hough(edges, new_hom)
                 if orange:
+                    print("saw orange")
                     move_to_orange(transform)
-                    mr.turn_left_degrees(180)
+                    print("U-turn")
+                    mr.left_uturn()
 
                 else:
-
-                    if(hough_coords == None):
+                    retry = 0
+                    while hough_coords == None and retry < 4:
                         print("lost the hough lines, trying new boundaries...")
+                        time.sleep(0.5)
+                        if turned == 0:
+                            mr.turn_right_degrees(6)
+                        if turned == 1:
+                            mr.turn_left_degrees(6)
+
                         black_and_white = b_and_w(new_hom, yellow_bounds=[[0,50,150],[60,255,255]])
                         edges = canny_lines(black_and_white)
                         hough_coords, hough_rho, hough_angle, orange = hough(edges, new_hom)
+                        retry += 1
 
-                    if(hough_coords == None): #again
-                        print("couldn't find hough lines. exiting")
-                        return #exit
+                    # if(hough_coords == None): #again
+                    #     print("couldn't find hough lines. exiting")
+                    #     return #exit
 
                     print("hough angle: " + str(hough_angle))
                     print("hough rho: " + str(hough_rho))
 
                     cv2.line(new_hom,(hough_coords[0],hough_coords[1]),(hough_coords[2],hough_coords[3]),(0,0,255),2)   
-                    cv2.imshow('hough_lines',new_hom)
-                    cv2.waitKey(5000)
+                    #cv2.imshow('hough_lines',new_hom)
+                    #cv2.waitKey(5000)
                     #return
 
-                    if (hough_rho > 0 and hough_angle > 5 and hough_angle < 90):
+                    if (hough_rho > 0 and hough_angle > 10 and hough_angle < 88):
                         turn_angle = hough_angle
                         print("turn " + str(turn_angle) + " degrees right")
-                        mr.turn_right_degrees(turn_angle)
-                    elif (hough_rho > 0 and hough_angle > 90) or (hough_rho < 0 and hough_angle > 100 and hough_angle < 175):
+                        if turn_angle < 6:
+                            mr.turn_right_degrees(turn_angle + 6)
+                            mr.turn_left_degrees(6)
+                        else:
+                            mr.turn_right_degrees(turn_angle)
+                        turned = 1
+                    elif (hough_rho > 0 and hough_angle > 90) or (hough_rho < 0 and hough_angle > 92 and hough_angle < 178):
                         turn_angle = 180 - hough_angle
                         print("turn " + str(turn_angle) + " degrees left")
-                        mr.turn_left_degrees(turn_angle)
+                        if turn_angle < 6:
+                            mr.turn_left_degrees(turn_angle + 6)
+                            mr.turn_right_degrees(6)
+                        else:
+                            mr.turn_left_degrees(turn_angle)
+                        turned = 0
                     else:
                         print("parallel")
                         dist = get_dist(hough_rho, new_hom)
                         if(dist < -300):
-                            #mr.move_left_to_line(dist)
+                            mr.move_left_to_line(dist)
                             print("move left to line")
+                            turned = 0
                         elif(dist > 300):
-                            #mr.move_right_to_line(dist)
+                            mr.move_right_to_line(dist)
                             print("move right to line")
+                            turned = 1
                         else:   
                             mr.move_forward()   
         

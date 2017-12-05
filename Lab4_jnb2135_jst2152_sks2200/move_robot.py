@@ -4,20 +4,18 @@ from gopigo import *
 
 def right_uturn():
     print("UTURN - RIGHT")
-    set_left_speed(100)
-    set_right_speed(100)
+    #DPR = 360.0/64
     DPR = 360.0/64
-    enc_tgt(1,0,int(95//DPR))
+    enc_tgt(1,1,int(100//DPR))
     right_rot()
     time.sleep(0.5)
 
 
 def left_uturn():
     print("UTURN - LEFT")
-    set_left_speed(100)
-    set_right_speed(100)
+    #DPR = 360.0/64
     DPR = 360.0/64
-    enc_tgt(0,1,int(95//DPR))
+    enc_tgt(1,1,int(100//DPR))
     left_rot()
     time.sleep(0.5)
 
@@ -26,27 +24,23 @@ def move_forward():
     set_left_speed(105)
     set_right_speed(100)
     print("MOVE FORWARD")
-    enc_tgt(1,1,3)
+    enc_tgt(1,1,8)
     fwd()
     time.sleep(0.5)
 
 
 def turn_left_degrees(deg): 
-    set_left_speed(100)
-    set_right_speed(100)
     DPR = 360.0/64
-    enc_tgt(0,1,int(deg//DPR))
+    enc_tgt(1,1,int(deg//DPR))
     left_rot()
-    time.sleep(1.5)
+    time.sleep(.4)
 
 
-def turn_right_degrees(deg): 
-    set_left_speed(100)
-    set_right_speed(100)
+def turn_right_degrees(deg):
     DPR = 360.0/64
-    enc_tgt(1,0,int(deg//DPR))
+    enc_tgt(1,1,int(deg//DPR))
     right_rot()
-    time.sleep(1.5)
+    time.sleep(.4)
 
 
 def move_forward_pixels(pix):
@@ -75,4 +69,3 @@ def move_right_to_line(dist):
     move_forward_pixels(dist)
     print("turning left back to parallel...")
     turn_left_degrees(90)
-

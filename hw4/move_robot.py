@@ -31,14 +31,14 @@ def move_forward():
 
 def turn_right_degrees(deg): 
     DPR = 360.0/64
-    enc_tgt(0,1,int(deg*2//DPR))
+    enc_tgt(0,1,int(deg//DPR))
     left_rot()
     time.sleep(0.5)
 
 
 def turn_left_degrees(deg): 
     DPR = 360.0/64
-    enc_tgt(0,1,int(deg*2//DPR))
+    enc_tgt(0,1,int(deg//DPR))
     left_rot()
     time.sleep(0.5)
 

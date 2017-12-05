@@ -1,6 +1,6 @@
 #Lab 4
 ###Group 12 [jnb2135, jst2152, sks2200]
-###Youtube link: <url>
+###Youtube link: https://youtu.be/gAadmgO2Q78
 
 You can find our main in lane_follower.py and helper functions in lane_follower.py, capture_img.py, move_robot.py
 We made the following assumptions about our robot/environment: 
