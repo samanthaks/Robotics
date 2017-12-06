@@ -1,5 +1,18 @@
 import sys
 import random
+import numpy as np 
+import matplotlib.path as mplPath
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+
+global obstacles
+
+def isCollision(point):
+	for obstacle in obstacles:
+		if obstacle.contains_point(point):
+			return true
+
+	return false
 
 def generate_point():
 	return [random.randint(0,600), random.randint(0,600)]
@@ -18,10 +31,36 @@ def path_finder(args):
 	epsilon = args[3]
 
 	start = start_file.readline()
-	start = list(map(int, start.split())
+	start = list(map(int, start.split()))
 	end = start_file.readline()
-	end = list(map(int, end.split())
-	
+	end = list(map(int, end.split()))
+
+	fig = plt.figure()
+
+	line = obstacles_file.readline()
+	obstacles = []
+	if line != "":
+		num_obstacles = int(line)
+		line = obstacles_file.readline()		
+		while line != "":
+			vertices = int(line)
+			polypath = []
+			for vertex in range(vertices):
+				point = obstacles_file.readline()
+				points = point.split(" ")
+				polypath.append([int(points[0]), int(points[1])])
+			print(polypath)
+			obstacle =  mplPath.Path(polypath)
+			obstacles.append(obstacle)
+			ax = fig.add_subplot(111)
+			patch = patches.PathPatch(obstacle, facecolor='red', lw=0)
+			ax.add_patch(patch)
+			line = obstacles_file.readline()
+
+	ax.set_xlim(0,600)
+	ax.set_ylim(0,600)
+	plt.show()
+		
 					
 		
 	
