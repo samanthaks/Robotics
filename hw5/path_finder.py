@@ -22,7 +22,17 @@ def distance(point_1, point_2):
 	y1 = point_1[1]
 	x2 = point_2[0]
 	y2 = point_2[1]
-	return sqrt((x2-x1)**2 + (y2-y1)**2) 
+	return sqrt((x2-x1)**2 + (y2-y1)**2)
+
+def get_min_distance(new_point,tree):
+	min_dist = 10000000000
+	connecting_point = []
+	for tree_point in list(tree):
+		dist = distance(tree_point, new_point)
+		if dist < min_dist:
+			min_dist = dist
+			connecting_point = tree_point
+	return min_dist, tree_point
 
 def path_finder(args):
 	#print(args)
@@ -60,11 +70,28 @@ def path_finder(args):
 	ax.set_xlim(0,600)
 	ax.set_ylim(0,600)
 	plt.show()
+
+	nodes = {}
+	tree = set([start])
+	current_point = []
 		
-					
-		
+	# plot(start)
+
+	while current_point != end:
+		new_point = generate_point()
+		if new_point in tree: #or collision(new_point):
+			break	
+
+		min_distance,parent = get_min_distance(new_point,tree)
+
+		while(min_distance > epsilon):
+			new_point = generate_point()
+			min_distance,parent = get_min_distance(new_point,tree)
 	
-	
+		current_point = new_point	
+		nodes[current_point] = parent
+		tree.add(current_point)
+		# plot_line(parent, current_point)
 
 
 if __name__ == '__main__':
