@@ -130,6 +130,7 @@ def path_finder(args):
 	check2 = 10000000
 	goal_radius = 50
 	N = 1000
+	
 	while (check1 > goal_radius or isCollision([new_point_check1,(int(store2[0]),int(store2[1]))],obstacles)) and (check2 > goal_radius or isCollision([new_point_check2,(int(store1[0]),int(store1[1]))],obstacles))  and count < N:
 		new_point1 = generate_point()
 		new_point_check1 = new_point1
