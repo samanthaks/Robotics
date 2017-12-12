@@ -125,10 +125,12 @@ def path_finder(args):
 	new_point2 = end
 	
 	# plot(start)
-	count =0 
+	count = 0 
 	check1 = 10000000
 	check2 = 10000000
-	while check1 > 50 and check2 > 50 and count != 1000:
+	goal_radius = 50
+	N = 1000
+	while (check1 > goal_radius or isCollision([new_point_check1,(int(store2[0]),int(store2[1]))],obstacles)) and (check2 > goal_radius or isCollision([new_point_check2,(int(store1[0]),int(store1[1]))],obstacles))  and count < N:
 		new_point1 = generate_point()
 		new_point_check1 = new_point1
 
@@ -161,7 +163,6 @@ def path_finder(args):
 				new_point1 = [parent1[0] + int(epsilon) * math.cos(angle), parent1[1] + int(epsilon) * math.sin(angle)]
 				new_point_check1 = [int(parent1[0] + int(epsilon) * math.cos(angle)), int(parent1[1] + int(epsilon) * math.sin(angle))]
 
-			print(distance(new_point1,parent1))
 
 
 		while tuple(new_point2) in tree2 or isCollision([(int(parent2[0]),int(parent2[1])),tuple(new_point_check2)],obstacles):
@@ -174,10 +175,9 @@ def path_finder(args):
 				new_point2 = [parent2[0] + int(epsilon) * math.cos(angle), parent2[1] + int(epsilon) * math.sin(angle)]
 				new_point_check2 = [int(parent2[0] + int(epsilon) * math.cos(angle)), int(parent2[1] + int(epsilon) * math.sin(angle))]
 
-			print(distance(new_point2,parent2))
 
 		
-		plt.plot([parent1[0],new_point1[0]],[parent1[1],new_point1[1]],'k')
+		plt.plot([parent1[0],new_point1[0]],[parent1[1],new_point1[1]],'r')
 		plt.plot([parent2[0],new_point2[0]],[parent2[1],new_point2[1]],'b')
 		nodes1[tuple(new_point1)] = parent1
 		tree1.add(tuple(new_point1))
@@ -190,13 +190,10 @@ def path_finder(args):
 	
 		count+=1
 
-	print(new_point2,store1)
-	print(new_point1,store2)
-
 	nodes1[tuple(new_point1)] = parent1
 	nodes2[tuple(new_point2)] = parent2
 
-	if check2 < 50:
+	if check2 < goal_radius:
 		current1 = store1
 		current2 = new_point2
 	else:
@@ -206,8 +203,8 @@ def path_finder(args):
 	plt.plot([current1[0],current2[0]],[current1[1],current2[1]],'b')
 	
 	#print(list(tree))
-	plt.scatter(56,18, s=25,c ='r')
-	plt.scatter(448,542)
+	plt.scatter(56,18, c ='r')
+	plt.scatter(448,542, c='b')
 	plt.scatter(448,542,s=3)
 	
 	for entry in list(tree1):
@@ -218,11 +215,11 @@ def path_finder(args):
 
 	
 	while current1 != start:
-		plt.scatter(current1[0],current1[1],s=50,c='k')
+		plt.scatter(current1[0],current1[1],s=10,c='k',zorder=3)
 		current1 = nodes1[tuple(current1)]
 	
 	while current2 != end:
-		plt.scatter(current2[0],current2[1],s=50,c='k')
+		plt.scatter(current2[0],current2[1],s=10,c='k',zorder=3)
 		current2 = nodes2[tuple(current2)]
 	
 	#plt.plot([new_point[0],end[0]],[new_point[1],end[1]],'k')
