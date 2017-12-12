@@ -120,10 +120,12 @@ def path_finder(args):
 	tree = set()
 	tree.add(start)
 	new_point = start
+	new_point_check = start
+
 	
 	# plot(start)
 	count =0 
-	while distance(new_point,tuple(end)) > 50 and count != 1000:
+	while (distance(new_point,tuple(end)) > 50 or isCollision([new_point_check,end],obstacles)) and count != 1000:
 		new_point = generate_point()
 		new_point_check = new_point
 		min_distance,parent = get_min_distance(tuple(new_point),tree)
@@ -136,7 +138,7 @@ def path_finder(args):
 
 		
 		
-		while tuple(new_point) in tree or isCollision([(int(parent[0]),int(parent[1])),tuple(new_point_check)],obstacles):
+		while tuple(new_point) in tree or isCollision([(int(parent[0]),int(parent[1])),new_point_check],obstacles):
 			new_point = generate_point()
 			new_point_check = new_point
 			min_distance,parent = get_min_distance(new_point,tree)

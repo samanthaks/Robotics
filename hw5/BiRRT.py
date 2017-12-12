@@ -24,10 +24,6 @@ def isCollision(line1, obstacles):
 	return False
 
 		
-
-
-
-
 def isIntersection(line1,line2):
 	p1 = line1[0]
 	p2 = line1[1]
