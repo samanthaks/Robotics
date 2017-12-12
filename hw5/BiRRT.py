@@ -102,7 +102,7 @@ def path_finder(args):
 			obstacle =  mplPath.Path(polypath)
 			obstacles.append(polypath)
 			ax = fig.add_subplot(111)
-			patch = patches.PathPatch(obstacle, facecolor='red', lw=0)
+			patch = patches.PathPatch(obstacle, lw=0)
 			ax.add_patch(patch)
 			line = obstacles_file.readline()
     

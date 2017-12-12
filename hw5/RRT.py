@@ -23,11 +23,6 @@ def isCollision(line1, obstacles):
 
 	return False
 
-		
-
-
-
-
 def isIntersection(line1,line2):
 	p1 = line1[0]
 	p2 = line1[1]
@@ -106,7 +101,7 @@ def path_finder(args):
 			obstacle =  mplPath.Path(polypath)
 			obstacles.append(polypath)
 			ax = fig.add_subplot(111)
-			patch = patches.PathPatch(obstacle, facecolor='red', lw=0)
+			patch = patches.PathPatch(obstacle, lw=0)
 			ax.add_patch(patch)
 			line = obstacles_file.readline()
     
